@@ -1,9 +1,9 @@
-(ns any-http.http-kit
+(ns any-http.aleph
   (:require
    [any-http.util :as util]
    [any-http.api :as api]
    [clojure.string :as str]
-   [org.httpkit.client :as client]))
+   [aleph.http :as client]))
 
 
 (def defaults-required
@@ -19,6 +19,7 @@
                                 ~options
                                 defaults-required))]
      (-> @resp#
+         (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]
            (api/make-response ~'status ~'body ~'headers))
          #_
@@ -26,7 +27,7 @@
            (catch Throwable e#
              )))))
 
-(deftype HTTPKitClient [defaults]
+(deftype AlephClient [defaults]
 
   api/HTTPClient
 
@@ -65,7 +66,7 @@
   ([]
    (client nil))
   ([defaults]
-   (new HTTPKitClient defaults)))
+   (new AlephClient defaults)))
 
 
 (comment

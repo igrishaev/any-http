@@ -1,4 +1,5 @@
 (ns any-http.util
+  (:refer-clojure :exclude [update-keys parse-long])
   (:require
    [clojure.string :as str]))
 
@@ -10,6 +11,13 @@
       (assoc! acc! (f k) v))
     (transient {})
     m)))
+
+
+(defn parse-long [value]
+  (try
+    (Long/parseLong value)
+    (catch NumberFormatException e
+      nil)))
 
 
 (defn header->kw [header]

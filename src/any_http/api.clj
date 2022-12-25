@@ -1,10 +1,13 @@
-(ns any-http.core
+(ns any-http.api
   (:refer-clojure :exclude [get])
   (:require
+   [any-http.util :as util]
    [clojure.string :as str]))
 
 
 (defprotocol HTTPClient
+
+  ;; sync
 
   (get
     [this url]
@@ -33,6 +36,8 @@
   (request
     [this url]
     [this url options])
+
+  ;; async
 
   (get-async
     [this url callback]
@@ -73,10 +78,38 @@
   (new Response status body headers))
 
 
+(defn header [response kw-header]
+  (some-> response
+          :headers
+          (clojure.core/get kw-header)))
+
+
+(defn content-type [response]
+  (some-> response
+          (header :content-type)
+          (str/split #"\s*;\s*" 2)
+          first
+          str/lower-case))
+
+
+(defn charset [response]
+  (when-let [ct
+             (some-> response
+                     (header :content-type))]
+    (second (re-find #"charset\s*=\s*(.+)" ct))))
+
+
+(defn content-length [response]
+  (some-> response
+          (header :content-length)
+          (util/parse-long)))
+
+
 (defn json? [response]
-  (some->> response :content-type (re-find #"(?i)application/json")))
+  (-> response
+      content-type
+      (= "application/json")))
 
 
 (defn etag [response]
-
-  )
+  (header response :etag))

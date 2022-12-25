@@ -1,9 +1,9 @@
-(ns any-http.clj-http
+(ns any-http.clj-http-lite
   (:require
    [any-http.util :as util]
    [any-http.api :as api]
    [clojure.string :as str]
-   [clj-http.client :as client]))
+   [clj-http.lite.client :as client]))
 
 
 (def defaults-required
@@ -20,7 +20,7 @@
                             ~options
                             defaults-required))]
      (-> resp#
-         (update :headers util/update-keys util/header->kw)
+         (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]
            (api/make-response ~'status ~'body ~'headers))
          #_
@@ -29,7 +29,7 @@
              )))))
 
 
-(deftype CljHTTPClient [defaults]
+(deftype CljHTTPLiteClient [defaults]
 
   api/HTTPClient
 
@@ -51,9 +51,11 @@
   (put [this url options]
     (perform client/put url defaults options))
 
+  #_
   (patch [this url]
     (perform client/patch url defaults nil))
 
+  #_
   (patch [this url options]
     (perform client/patch url defaults options))
 
@@ -68,7 +70,7 @@
   ([]
    (client nil))
   ([defaults]
-   (new CljHTTPClient defaults)))
+   (new CljHTTPLiteClient defaults)))
 
 
 (comment

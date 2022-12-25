@@ -1,9 +1,9 @@
-(ns any-http.http-kit
+(ns any-http.hato
   (:require
    [any-http.util :as util]
    [any-http.api :as api]
    [clojure.string :as str]
-   [org.httpkit.client :as client]))
+   [hato.client :as client]))
 
 
 (def defaults-required
@@ -18,7 +18,8 @@
                                 ~defaults
                                 ~options
                                 defaults-required))]
-     (-> @resp#
+     (-> resp#
+         (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]
            (api/make-response ~'status ~'body ~'headers))
          #_
@@ -26,7 +27,7 @@
            (catch Throwable e#
              )))))
 
-(deftype HTTPKitClient [defaults]
+(deftype HatoClient [defaults]
 
   api/HTTPClient
 
@@ -65,7 +66,7 @@
   ([]
    (client nil))
   ([defaults]
-   (new HTTPKitClient defaults)))
+   (new HatoClient defaults)))
 
 
 (comment
