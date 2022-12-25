@@ -9,6 +9,7 @@
    [any-http.clj-http-lite :as clj-http-lite]
    [any-http.http-kit :as http-kit]
 
+   [clojure.string :as str]
    [clojure.test :refer [deftest is testing use-fixtures]]))
 
 
@@ -56,43 +57,32 @@
     (is (api/json? resp))))
 
 
-(deftest test-post-json
-  (let [capture!
+(deftest test-post-form-params
+  (let [request!
         (atom nil)
 
         app
         {:post {"/api/post"
-                (fn [{:as request :keys [params]}]
-                  (reset! capture! request)
+                (fn [request]
+                  (reset! request! request)
                   {:status 200
-                   :body {:input params}})}}
+                   :body {:ok true}})}}
 
         {:as resp}
         (server/with-http [38080 app]
           (api/post *client*
                     "http://localhost:38080/api/post"
+                    {:content-type :json ;; ignored
+                     :form-params {:array [1 2 3]}}))
 
-                    {:content-type :json
-                     :form-params {:array [1 2 3]}}
+        request
+        @request!]
 
-                    #_
-                    {:headers {"content-type" "application/json"}
-                     :body (cheshire.core/generate-string {:a 1 :b 2})}))]
+    (is (str/starts-with?
+         (-> request
+             :headers
+             (get "content-type"))
+         "application/x-www-form-urlencoded"))
 
-    #_
-    (is (= {:array [1 2 3]}
-           (-> @capture! :params)))
-
-    (is (= "application/json"
-           (-> @capture! :headers (get "content-type"))))
-
-
-
-    #_
-    (is (= 1 resp))
-
-
-
-    )
-
-  )
+    (is (= {:array ["1" "2" "3"]}
+           (:params request)))))

@@ -13,11 +13,13 @@
 
 (defmacro perform [method url defaults options]
   `(let [resp#
-         (client/request (merge {:url ~url
-                                 :method ~method}
-                                ~defaults
-                                ~options
-                                defaults-required))]
+         (client/request (-> {:url ~url
+                              :method ~method}
+                             (merge
+                              ~defaults
+                              ~options
+                              defaults-required)
+                             (dissoc :content-type)))]
      (-> resp#
          (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]

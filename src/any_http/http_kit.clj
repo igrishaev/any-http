@@ -8,6 +8,7 @@
 
 (def defaults-required
   {:as :stream
+   :content-type nil
    :timeout 2000})
 
 

@@ -8,6 +8,7 @@
 
 (def defaults-required
   {:as :stream
+   :content-type nil
    :throw-exceptions true
    :coerce :always
    :socket-timeout 1000
