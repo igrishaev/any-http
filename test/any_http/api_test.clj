@@ -43,10 +43,9 @@
 
     (is (= {:status 200
             :headers
-            {:connection "close",
-             :content-type "application/json;charset=utf-8",
+            {:content-type "application/json;charset=utf-8",
              :server "Jetty(9.4.12.v20180830)"}}
 
            (-> resp
                (dissoc :body)
-               (update :headers dissoc :date))))))
+               (update :headers select-keys [:content-type :server]))))))
