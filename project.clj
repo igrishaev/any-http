@@ -22,4 +22,8 @@
      [http-kit "2.6.0"]
      [aleph "0.6.0"]
      [hato "0.9.0"]
-     [org.clj-commons/clj-http-lite "1.0.13"]]}})
+     [org.clj-commons/clj-http-lite "1.0.13"]
+
+     [ring/ring-json "0.5.0"]
+     [ring/ring-core "1.7.1"]
+     [ring/ring-jetty-adapter "1.7.1"]]}})
