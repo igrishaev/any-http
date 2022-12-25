@@ -113,3 +113,10 @@
 
 (defn etag [response]
   (header response :etag))
+
+
+(defn ok? [response]
+  (some-> response
+          :status
+          (util/as [status]
+            (<= 200 status 299))))

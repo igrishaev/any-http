@@ -16,11 +16,13 @@
 
 
 (def clients
-  [["clj-http" clj-http/client]
-   ["clj-http-lite" clj-http-lite/client]
-   ["hato" hato/client]
-   ["aleph" aleph/client]
-   ["http-kit" http-kit/client]])
+  {
+   "clj-http"      clj-http/client
+   "clj-http-lite" clj-http-lite/client
+   "hato"          hato/client
+   "aleph"         aleph/client
+   "http-kit"      http-kit/client
+   })
 
 
 (defn fix-client [t]
@@ -37,7 +39,7 @@
   (let [app
         {:get {"/api/get" {:status 200 :body {:foo 1}}}}
 
-        resp
+        {:as resp :keys [body]}
         (server/with-http [38080 app]
           (api/get *client* "http://localhost:38080/api/get"))]
 
@@ -48,4 +50,49 @@
 
            (-> resp
                (dissoc :body)
-               (update :headers select-keys [:content-type :server]))))))
+               (update :headers select-keys [:content-type :server]))))
+
+    (is (api/ok? resp))
+    (is (api/json? resp))))
+
+
+(deftest test-post-json
+  (let [capture!
+        (atom nil)
+
+        app
+        {:post {"/api/post"
+                (fn [{:as request :keys [params]}]
+                  (reset! capture! request)
+                  {:status 200
+                   :body {:input params}})}}
+
+        {:as resp}
+        (server/with-http [38080 app]
+          (api/post *client*
+                    "http://localhost:38080/api/post"
+
+                    {:content-type :json
+                     :form-params {:array [1 2 3]}}
+
+                    #_
+                    {:headers {"content-type" "application/json"}
+                     :body (cheshire.core/generate-string {:a 1 :b 2})}))]
+
+    #_
+    (is (= {:array [1 2 3]}
+           (-> @capture! :params)))
+
+    (is (= "application/json"
+           (-> @capture! :headers (get "content-type"))))
+
+
+
+    #_
+    (is (= 1 resp))
+
+
+
+    )
+
+  )
