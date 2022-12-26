@@ -13,24 +13,36 @@
    [clojure.test :refer [deftest is testing use-fixtures]]))
 
 
+(def ^:dynamic *client-type* nil)
 (def ^:dynamic *client* nil)
 
 
 (def clients
   {
-   "clj-http"      clj-http/client
-   "clj-http-lite" clj-http-lite/client
-   "hato"          hato/client
-   "aleph"         aleph/client
-   "http-kit"      http-kit/client
+   :clj-http      clj-http/client
+   :clj-http-lite clj-http-lite/client
+   :hato          hato/client
+   :aleph         aleph/client
+   :http-kit      http-kit/client
    })
 
 
 (defn fix-client [t]
-  (doseq [[c-name c-new] clients]
-    (binding [*client* (c-new)]
-      (testing (format "Testng client: %s" c-name)
+  (doseq [[client-type client] clients]
+    (binding [*client-type* client-type
+              *client* (client)]
+      (testing (format "Testng client: %s" client-type)
         (t)))))
+
+
+(defmacro when-client-type [client-type & body]
+  `(when (= *client-type* ~client-type)
+     ~@body))
+
+
+(defmacro when-not-client-type [client-type & body]
+  `(when-not (= *client-type* ~client-type)
+     ~@body))
 
 
 (use-fixtures :each fix-client)
@@ -121,7 +133,35 @@
 
 
 (deftest test-post-multipart
-  )
+  (let [params!
+        (atom nil)
+
+        app
+        {:post {"/api/multipart"
+               (fn [{:keys [params]}]
+                 (reset! params! params)
+                 {:status 200
+                  :body {:ok true}})}}
+
+        {:as resp}
+        (server/with-http [38080 app]
+          (api/post *client*
+                   "http://localhost:38080/api/multipart"
+                   {:content-type :json ;; ignored
+                    :multipart [{:name "title" :content "My Awesome Picture"}
+                                {:name "Content/type" :content "image/jpeg"}
+                                {:name "foo.txt" :content "Eggplants"}
+                                {:name "file" :content (clojure.java.io/file "project.clj")}]}))
+
+        params
+        @params!]
+
+    (when-not-client-type :clj-http-lite
+
+      (is (= {:title "My Awesome Picture",
+              "Content/type" "image/jpeg",
+              "foo.txt" "Eggplants"}
+             (dissoc params :file))))))
 
 
 (deftest test-get-redirects

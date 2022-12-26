@@ -6,6 +6,7 @@
    [ring.middleware.json :refer [wrap-json-response
                                  wrap-json-params]]
    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+   [ring.middleware.multipart-params :refer [wrap-multipart-params]]
    [ring.middleware.params :refer [wrap-params]]))
 
 
@@ -48,6 +49,7 @@
                   make-app
                   wrap-keyword-params
                   wrap-json-params
+                  wrap-multipart-params
                   wrap-params
                   wrap-json-response)
 
