@@ -157,11 +157,13 @@
         @params!]
 
     (when-not-client-type :clj-http-lite
-
       (is (= {:title "My Awesome Picture",
               "Content/type" "image/jpeg",
               "foo.txt" "Eggplants"}
-             (dissoc params :file))))))
+             (dissoc params :file))))
+
+    (when-client-type :clj-http-lite
+      (is (= {} params)))))
 
 
 (deftest test-get-redirects
@@ -169,7 +171,27 @@
 
 
 (deftest test-get-basic-auth
-  )
+  (let [headers!
+        (atom nil)
+
+        app
+        {:get {"/api/basic-auth"
+               (fn [{:keys [headers]}]
+                 (reset! headers! headers)
+                 {:status 200
+                  :body {:ok true}})}}
+
+        {:as resp}
+        (server/with-http [38080 app]
+          (api/get *client*
+                   "http://localhost:38080/api/basic-auth"
+                   {:basic-auth ["username" "password"]}))
+
+        headers
+        @headers!]
+
+    (is (= "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
+           (get headers "authorization")))))
 
 
 (deftest test-post-json-str

@@ -1,6 +1,5 @@
 (ns any-http.server
   (:require
-   [clojure.pprint :as pprint]
    [clojure.string :as str]
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.middleware.json :refer [wrap-json-response
@@ -19,11 +18,6 @@
   (fn [request]
     (let [{:keys [params]} request
           {:keys [request-method uri]} request]
-
-      (printf "HTTP %s %s %s"
-              (-> request-method name str/upper-case)
-              uri
-              params)
 
       (let [response
             (get-in method->path->response
