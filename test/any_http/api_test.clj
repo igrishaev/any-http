@@ -86,3 +86,100 @@
 
     (is (= {:array ["1" "2" "3"]}
            (:params request)))))
+
+
+(deftest test-get-query-params
+  (let [params!
+        (atom nil)
+
+        app
+        {:get {"/api/query"
+               (fn [{:keys [params]}]
+                 (reset! params! params)
+                 {:status 200
+                  :body {:ok true}})}}
+
+        {:as resp}
+        (server/with-http [38080 app]
+          (api/get *client*
+                   "http://localhost:38080/api/query"
+                   {:content-type :json ;; ignored
+                    :query-params {:a 1
+                                   :b 2
+                                   "foo" {:bar {:baz 3}}
+                                   :c [1 2 3]
+                                   }}))
+
+        params
+        @params!]
+
+    (is (= {:a "1"
+            :b "2"
+            "foo[bar][baz]" "3"
+            :c ["1" "2" "3"]}
+           params))))
+
+
+(deftest test-post-multipart
+  )
+
+
+(deftest test-get-redirects
+  )
+
+
+(deftest test-get-basic-auth
+  )
+
+
+(deftest test-post-json-str
+  )
+
+
+(deftest test-post-json-stream
+  )
+
+
+(deftest test-get-throw-exception
+  )
+
+
+(deftest test-get-timeout
+  )
+
+
+(deftest test-component
+  )
+
+
+(deftest test-kw-headers
+  (let [request!
+        (atom nil)
+
+        app
+        {:get {"/foo"
+               (fn [request]
+                 (reset! request! request)
+                 {:status 200
+                  :body {:ok true}})}}
+
+        {:as resp}
+        (server/with-http [38080 app]
+          (api/get *client*
+                   "http://localhost:38080/foo"
+                   {:headers {:aaa 1
+                              "bbb" 2}}))
+
+        request
+        @request!]
+
+    (is (= {"aaa" "1" "bbb" "2"}
+           (-> request
+               :headers
+               (select-keys ["aaa" "bbb"])
+               )
+           ))
+
+    )
+
+  )
