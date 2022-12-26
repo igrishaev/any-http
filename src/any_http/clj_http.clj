@@ -8,10 +8,11 @@
 
 (def defaults-required
   {:as :stream
-   :throw-exceptions true
-   :coerce :always
-   :socket-timeout 1000
-   :connection-timeout 1000})
+   :throw-exceptions false
+   ;; :coerce :always
+   ;; :socket-timeout 1000
+   ;; :connection-timeout 1000
+   })
 
 
 (defmacro perform [func url defaults options]

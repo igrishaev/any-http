@@ -8,8 +8,10 @@
 
 (def defaults-required
   {:as :stream
+   :throw-exceptions false
    ;; :content-type nil
-   :timeout 2000})
+   ;; :timeout 2000
+   })
 
 
 (defmacro perform [method url defaults options]

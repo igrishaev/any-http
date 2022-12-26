@@ -180,11 +180,22 @@
   )
 
 
-(deftest test-get-throw-exception
-  )
+(deftest test-get-non-200
+  (let [app
+        {:get {"/error"
+               {:status 500
+                :body {:error "oh"}}}}
+
+        {:as resp :keys [status body]}
+        (server/with-http [38080 app]
+          (api/get *client*
+                   "http://localhost:38080/error"))]
+
+    (is (= 500 status))
+    (is (instance? java.io.InputStream body))))
 
 
-(deftest test-get-timeout
+(deftest test-timeout
   )
 
 
