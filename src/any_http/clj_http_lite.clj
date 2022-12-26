@@ -17,9 +17,12 @@
 
 (defmacro perform [func url defaults options]
   `(let [resp#
-         (~func ~url (merge ~defaults
-                            ~options
-                            defaults-required))]
+         (~func ~url (-> ~defaults
+                         (merge
+                          ~options
+                          defaults-required)
+                         (update :headers util/update-keys name)))]
+
      (-> resp#
          (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]

@@ -167,13 +167,13 @@
         (server/with-http [38080 app]
           (api/get *client*
                    "http://localhost:38080/foo"
-                   {:headers {:aaa 1
-                              "bbb" 2}}))
+                   {:headers {:aaa "foo"
+                              "bbb" "bar"}}))
 
         request
         @request!]
 
-    (is (= {"aaa" "1" "bbb" "2"}
+    (is (= {"aaa" "foo" "bbb" "bar"}
            (-> request
                :headers
                (select-keys ["aaa" "bbb"])

@@ -14,11 +14,14 @@
 
 (defmacro perform [method url defaults options]
   `(let [resp#
-         (client/request (merge {:url ~url
-                                 :method ~method}
-                                ~defaults
-                                ~options
-                                defaults-required))]
+         (client/request (-> {:url ~url
+                              :method ~method}
+                             (merge
+                              ~defaults
+                              ~options
+                              defaults-required)
+                             (update :headers util/update-keys name)))]
+
      (-> @resp#
          (util/as [{:keys [~'status ~'body ~'headers]}]
            (api/make-response ~'status ~'body ~'headers))

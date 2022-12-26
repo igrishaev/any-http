@@ -19,7 +19,8 @@
                               ~defaults
                               ~options
                               defaults-required)
-                             (dissoc :content-type)))]
+                             (dissoc :content-type)
+                             (update :headers util/update-keys name)))]
      (-> resp#
          (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]
