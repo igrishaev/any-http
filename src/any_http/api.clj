@@ -120,3 +120,30 @@
           :status
           (util/as [status]
             (<= 200 status 299))))
+
+
+(def -supported-fields
+
+  {
+   ;; :url
+   ;; :method
+   ;; :headers
+   ;; :query-params
+   ;; :form-params
+   ;; :multipart
+   ;; :body
+   ;; :basic-auth
+
+   ;; :redirects
+   ;; :timeout
+   ;; :accept
+   ;; :keepalive
+   ;; :insecure?
+   ;; :oauth-token
+
+   }
+
+
+
+
+  )
