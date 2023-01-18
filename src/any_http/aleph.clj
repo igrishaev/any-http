@@ -6,31 +6,32 @@
    [aleph.http :as client]))
 
 
-(def defaults-required
+(def common-params
+  (conj api/common-params :pool))
+
+
+(def overrides
   {:as :stream
-   :throw-exceptions false
-   ;; :content-type nil
-   ;; :timeout 2000
-   })
+   :throw-exceptions false})
 
 
 (defmacro perform [method url defaults options]
-  `(let [resp#
-         (client/request (-> {:url ~url
-                              :method ~method}
-                             (merge
-                              ~defaults
-                              ~options
-                              defaults-required)
-                             (dissoc :content-type)))]
-     (-> @resp#
+  `(let [request#
+         (-> ~defaults
+             (merge ~options)
+             (select-keys common-params)
+             (merge ~overrides)
+             (assoc :url ~url
+                    :method ~method))
+
+         response#
+         (client/request request#)]
+
+     (-> @response#
          (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]
-           (api/make-response ~'status ~'body ~'headers))
-         #_
-         (try
-           (catch Throwable e#
-             )))))
+           (api/make-response ~'status ~'body ~'headers)))))
+
 
 (deftype AlephClient [defaults]
 

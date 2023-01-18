@@ -6,31 +6,33 @@
    [hato.client :as client]))
 
 
-(def defaults-required
+(def common-params
+  (conj api/common-params :http-client))
+
+
+(def overrides
   {:as :stream
-   :throw-exceptions false
-   ;; :timeout 2000
-   })
+   :throw-exceptions false})
 
 
 (defmacro perform [method url defaults options]
-  `(let [resp#
-         (client/request (-> {:url ~url
-                              :method ~method}
-                             (merge
-                              ~defaults
-                              ~options
-                              defaults-required)
-                             (dissoc :content-type)
-                             (update :headers util/update-keys name)))]
-     (-> resp#
+  `(let [request#
+         (-> ~defaults
+             (merge ~options)
+             (select-keys common-params)
+             (merge ~overrides)
+             (update :headers util/update-keys name)
+             (assoc :url ~url
+                    :method ~method))
+
+         response#
+         (client/request request#)]
+
+     (-> response#
          (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]
-           (api/make-response ~'status ~'body ~'headers))
-         #_
-         (try
-           (catch Throwable e#
-             )))))
+           (api/make-response ~'status ~'body ~'headers)))))
+
 
 (deftype HatoClient [defaults]
 
@@ -72,6 +74,29 @@
    (client nil))
   ([defaults]
    (new HatoClient defaults)))
+
+
+(defn component
+
+  ([]
+   (component nil))
+
+  ([defaults]
+   (with-meta (client defaults)
+     {'com.stuartsierra.component/start
+      (fn [this]
+        (assoc-in this
+                  [:defaults :http-client]
+                  (client/build-http-client nil)))
+      'com.stuartsierra.component/stop
+      (fn [this]
+        this
+        #_
+        (update-in this
+                   [:defaults :http-client]
+                   (fn [http-client]
+                     (when http-client
+                       ))))})))
 
 
 (comment

@@ -6,34 +6,30 @@
    [clj-http.lite.client :as client]))
 
 
-(def defaults-required
+(def common-params
+  api/common-params)
+
+
+(def overrides
   {:as :stream
-   :throw-exceptions false
-
-   ;; :content-type nil
-   ;; :coerce :always
-   ;; :socket-timeout 1000
-   ;; :connection-timeout 1000
-
-   })
+   :throw-exceptions false})
 
 
 (defmacro perform [func url defaults options]
-  `(let [resp#
-         (~func ~url (-> ~defaults
-                         (merge
-                          ~options
-                          defaults-required)
-                         (update :headers util/update-keys name)))]
+  `(let [request#
+         (-> ~defaults
+             (merge ~options)
+             (select-keys common-params)
+             (merge ~overrides)
+             (update :headers util/update-keys name))
 
-     (-> resp#
+         response#
+         (~func ~url request#)]
+
+     (-> response#
          (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]
-           (api/make-response ~'status ~'body ~'headers))
-         #_
-         (try
-           (catch Throwable e#
-             )))))
+           (api/make-response ~'status ~'body ~'headers)))))
 
 
 (deftype CljHTTPLiteClient [defaults]

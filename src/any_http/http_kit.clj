@@ -6,29 +6,31 @@
    [org.httpkit.client :as client]))
 
 
-(def defaults-required
-  {:as :stream
-   :content-type nil
-   :timeout 2000})
+(def common-params
+  (conj api/common-params :worker-pool))
+
+
+(def overrides
+  {:as :stream})
 
 
 (defmacro perform [method url defaults options]
-  `(let [resp#
-         (client/request (-> {:url ~url
-                              :method ~method}
-                             (merge
-                              ~defaults
-                              ~options
-                              defaults-required)
-                             (update :headers util/update-keys name)))]
+  `(let [request#
+         (-> ~defaults
+             (merge ~options)
+             (select-keys common-params)
+             (merge ~overrides)
+             (update :headers util/update-keys name)
+             (assoc :url ~url
+                    :method ~method))
 
-     (-> @resp#
+         response#
+         (client/request request#)]
+
+     (-> @response#
          (util/as [{:keys [~'status ~'body ~'headers]}]
-           (api/make-response ~'status ~'body ~'headers))
-         #_
-         (try
-           (catch Throwable e#
-             )))))
+           (api/make-response ~'status ~'body ~'headers)))))
+
 
 (deftype HTTPKitClient [defaults]
 

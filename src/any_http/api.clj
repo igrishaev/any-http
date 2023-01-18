@@ -122,26 +122,26 @@
             (<= 200 status 299))))
 
 
-(def -supported-fields
+(def common-params
 
-  {
-   ;; :url
-   ;; :method
-   ;; :headers
-   ;; :query-params
-   ;; :form-params
-   ;; :multipart
-   ;; :body
-   ;; :basic-auth
+  #{
+    :url
+    :method
+    :headers
+    :query-params
+    :form-params
+    :multipart
+    :body
+    :basic-auth
 
-   ;; :redirects
-   ;; :timeout
-   ;; :accept
-   ;; :keepalive
-   ;; :insecure?
-   ;; :oauth-token
+    ;; :redirects
+    ;; :timeout
+    ;; :accept
+    ;; :keepalive
+    ;; :insecure?
+    ;; :oauth-token
 
-   }
+    }
 
 
 

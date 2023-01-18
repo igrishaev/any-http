@@ -236,7 +236,7 @@
                  {:status 200
                   :body {:ok true}})}}
 
-        {:as resp}
+        {:as resp :keys [headers]}
         (server/with-http [38080 app]
           (api/get *client*
                    "http://localhost:38080/foo"
@@ -246,13 +246,12 @@
         request
         @request!]
 
+    (is (= {:content-type "application/json;charset=utf-8"
+           :server "Jetty(9.4.12.v20180830)"}
+           (select-keys headers [:server
+                                 :content-type])))
+
     (is (= {"aaa" "foo" "bbb" "bar"}
            (-> request
                :headers
-               (select-keys ["aaa" "bbb"])
-               )
-           ))
-
-    )
-
-  )
+               (select-keys ["aaa" "bbb"]))))))
