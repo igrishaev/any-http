@@ -23,9 +23,15 @@
          response#
          (client/request request#)]
 
-     (-> @response#
-         (util/as [{:keys [~'status ~'body ~'headers]}]
-           (api/make-response ~'status ~'body ~'headers)))))
+     (let [response# @response#
+           error#    (:error response#)
+           status#   (:status response#)
+           body#     (:body response#)
+           headers#  (:headers response#)]
+
+       (if error#
+         (throw error#)
+         (api/make-response status# body# headers#)))))
 
 
 (alter-var-root #'api/h derive TAG ::api/client)
@@ -38,7 +44,11 @@
 
 (defmethod api/set-param [TAG :timeout]
   [_ params _ timeout]
-  (assoc params :timeout timeout))
+  (assoc params
+         :timeout timeout
+         :connect-timeout timeout
+         ;; :idle-timeout timeout
+         ))
 
 
 (deftype HTTPKitClient [defaults]

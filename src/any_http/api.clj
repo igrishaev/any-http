@@ -132,7 +132,8 @@
       (derive :headers       ::param)
       (derive :multipart     ::param)
       (derive :basic-auth    ::param)
-      (derive :insecure?     ::param)))
+      (derive :insecure?     ::param)
+      (derive :oauth-token   ::param)))
 
 
 (defmulti set-param
@@ -169,6 +170,12 @@
   (update params :form-params merge form-params))
 
 
+#_
+(defmethod set-param [TAG :oauth-token]
+  [_ params _ oauth-token]
+  (update params :oauth-token oauth-token))
+
+
 (defn set-params
 
   ([tag params]
@@ -181,11 +188,10 @@
     acc
     params)))
 
-
-;; :timeout
-
+;; socket-timeout
+;; connection-timeout
 ;; :max-redirects
 ;; :follow-redirects
-;; :accept
 ;; :keepalive
-;; :oauth-token
+
+;; components

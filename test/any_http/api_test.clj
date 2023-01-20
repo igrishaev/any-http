@@ -253,3 +253,51 @@
            (-> request
                :headers
                (select-keys ["aaa" "bbb"]))))))
+
+
+(deftest test-oauth-token
+
+  (let [request!
+        (atom nil)
+
+        app
+        {:get {"/foo"
+               (fn [request]
+                 (reset! request! request)
+                 {:status 200
+                  :body {:ok true}})}}
+
+        {:keys [status]}
+        (server/with-http [38080 app]
+          (api/get *client*
+                   "http://localhost:38080/foo"
+                   {:oauth-token "abc"}))
+
+        request
+        @request!]
+
+    (is (= 200 status))
+    (is (= "Bearer abc"
+           (-> request :headers (get "authorization"))))))
+
+
+(deftest test-timeout
+
+  (let [app
+        {:get {"/foo"
+               (fn [request]
+                 (Thread/sleep 1000)
+                 {:status 200
+                  :body {:ok true}})}}]
+
+    (is (thrown?
+         Exception
+         (server/with-http [38080 app]
+           (api/get *client*
+                    "http://localhost:38080/foo"
+                    {:timeout 500}))))
+
+
+
+    #_
+    (is (= 200 status))))
