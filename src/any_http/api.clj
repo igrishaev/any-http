@@ -133,13 +133,13 @@
     :multipart
     :body
     :basic-auth
+    :insecure?
 
     ;; :max-redirects
     ;; :follow-redirects
     ;; :timeout
     ;; :accept
     ;; :keepalive
-    ;; :insecure?
     ;; :oauth-token
 
     }
