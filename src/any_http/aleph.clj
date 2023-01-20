@@ -11,7 +11,14 @@
 
 (def overrides
   {:as :stream
-   :throw-exceptions false})
+   :throw-exceptions false
+
+   ;; :pool-timeout       1e2
+   ;; :connection-timeout 1e2
+   ;; :request-timeout    1e2
+   ;; :read-timeout       1e2
+
+   })
 
 
 (defmacro perform [method url defaults options]
