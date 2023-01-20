@@ -4,7 +4,6 @@
    [any-http.server :as server]
 
    [any-http.clj-http :as clj-http]
-   [any-http.hato :as hato]
    [any-http.aleph :as aleph]
    [any-http.clj-http-lite :as clj-http-lite]
    [any-http.http-kit :as http-kit]
@@ -21,7 +20,6 @@
   {
    :clj-http      clj-http/client
    :clj-http-lite clj-http-lite/client
-   :hato          hato/client
    :aleph         aleph/client
    :http-kit      http-kit/client
    })

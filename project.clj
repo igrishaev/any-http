@@ -21,7 +21,6 @@
      [clj-http "3.12.0"]
      [http-kit "2.6.0"]
      [aleph "0.6.0"]
-     [hato "0.9.0"]
      [org.clj-commons/clj-http-lite "1.0.13"]
 
      [cheshire "5.10.0"]
