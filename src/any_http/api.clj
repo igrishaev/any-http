@@ -134,7 +134,8 @@
     :body
     :basic-auth
 
-    ;; :redirects
+    ;; :max-redirects
+    ;; :follow-redirects
     ;; :timeout
     ;; :accept
     ;; :keepalive

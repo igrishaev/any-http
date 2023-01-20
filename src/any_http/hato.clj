@@ -21,9 +21,19 @@
              (merge ~options)
              (select-keys common-params)
              (merge ~overrides)
-             (update :headers util/update-keys name)
-             (assoc :url ~url
-                    :method ~method))
+             (assoc :url ~url :method ~method)
+             (util/as [request#]
+               (cond-> request#
+                 (:basic-auth request#)
+                 (-> (assoc-in [:headers :authorization]
+                               (let [[user# pass#] (:basic-auth request#)]
+                                 (format "Basic %s"
+                                         (-> (format "%s:%s" user# pass#)
+                                             (util/str->bytes)
+                                             (util/b64-encode)
+                                             (util/bytes->str)))))
+                     (dissoc :basic-auth))))
+             (update :headers util/update-keys name))
 
          response#
          (client/request request#)]
@@ -90,13 +100,7 @@
                   (client/build-http-client nil)))
       'com.stuartsierra.component/stop
       (fn [this]
-        this
-        #_
-        (update-in this
-                   [:defaults :http-client]
-                   (fn [http-client]
-                     (when http-client
-                       ))))})))
+        this)})))
 
 
 (comment
