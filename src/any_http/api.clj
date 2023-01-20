@@ -122,29 +122,70 @@
             (<= 200 status 299))))
 
 
-(def common-params
-
-  #{
-    :url
-    :method
-    :headers
-    :query-params
-    :form-params
-    :multipart
-    :body
-    :basic-auth
-    :insecure?
-
-    ;; :max-redirects
-    ;; :follow-redirects
-    ;; :timeout
-    ;; :accept
-    ;; :keepalive
-    ;; :oauth-token
-
-    }
+(def h
+  (-> (make-hierarchy)
+      (derive :url           ::param)
+      (derive :method        ::param)
+      (derive :body          ::param)
+      (derive :query-params  ::param)
+      (derive :form-params   ::param)
+      (derive :headers       ::param)
+      (derive :multipart     ::param)
+      (derive :basic-auth    ::param)
+      (derive :insecure?     ::param)))
 
 
+(defmulti set-param
+  (fn [tag params param value]
+    [tag param])
+  :hierarchy #'h)
 
 
-  )
+(defmethod set-param :default
+  [_ params param value]
+  params)
+
+
+(def TAG ::client)
+
+
+(defmethod set-param [TAG ::param]
+  [_ params param value]
+  (assoc params param value))
+
+
+(defmethod set-param [TAG :headers]
+  [_ params _ headers]
+  (update params :headers merge headers))
+
+
+(defmethod set-param [TAG :query-params]
+  [_ params _ query-params]
+  (update params :query-params merge query-params))
+
+
+(defmethod set-param [TAG :form-params]
+  [_ params _ form-params]
+  (update params :form-params merge form-params))
+
+
+(defn set-params
+
+  ([tag params]
+   (set-params nil tag params))
+
+  ([acc tag params]
+   (reduce-kv
+    (fn [acc k v]
+      (set-param tag acc k v))
+    acc
+    params)))
+
+
+;; :timeout
+
+;; :max-redirects
+;; :follow-redirects
+;; :accept
+;; :keepalive
+;; :oauth-token

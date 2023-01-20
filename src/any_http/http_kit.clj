@@ -6,8 +6,7 @@
    [org.httpkit.client :as client]))
 
 
-(def common-params
-  (conj api/common-params :worker-pool))
+(def TAG ::http-kit)
 
 
 (def overrides
@@ -17,12 +16,9 @@
 (defmacro perform [method url defaults options]
   `(let [request#
          (-> ~defaults
-             (merge ~options)
-             (select-keys common-params)
+             (api/set-params ~TAG ~options)
              (merge ~overrides)
-             (update :headers util/update-keys name)
-             (assoc :url ~url
-                    :method ~method))
+             (assoc :url ~url :method ~method))
 
          response#
          (client/request request#)]
@@ -30,6 +26,19 @@
      (-> @response#
          (util/as [{:keys [~'status ~'body ~'headers]}]
            (api/make-response ~'status ~'body ~'headers)))))
+
+
+(alter-var-root #'api/h derive TAG ::api/client)
+
+
+(defmethod api/set-param [TAG :headers]
+  [_ params _ headers]
+  (update params :headers merge (util/update-keys headers name)))
+
+
+(defmethod api/set-param [TAG :timeout]
+  [_ params _ timeout]
+  (assoc params :timeout timeout))
 
 
 (deftype HTTPKitClient [defaults]
@@ -71,13 +80,13 @@
   ([]
    (client nil))
   ([defaults]
-   (new HTTPKitClient defaults)))
+   (new HTTPKitClient (api/set-params TAG defaults))))
 
 
 (comment
 
-  (def -c (client))
+  (def -c (client {:insecure? true}))
 
-  (api/get -c "https://ya.ru")
+  (def -r (api/get -c "https://ya.ru"))
 
   )

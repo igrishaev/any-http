@@ -6,8 +6,7 @@
    [clj-http.lite.client :as client]))
 
 
-(def common-params
-  api/common-params)
+(def TAG ::http-kit)
 
 
 (def overrides
@@ -18,10 +17,8 @@
 (defmacro perform [func url defaults options]
   `(let [request#
          (-> ~defaults
-             (merge ~options)
-             (select-keys common-params)
-             (merge ~overrides)
-             (update :headers util/update-keys name))
+             (api/set-params ~TAG ~options)
+             (merge ~overrides))
 
          response#
          (~func ~url request#)]
@@ -30,6 +27,21 @@
          (update :headers util/update-keys keyword)
          (util/as [{:keys [~'status ~'body ~'headers]}]
            (api/make-response ~'status ~'body ~'headers)))))
+
+
+(alter-var-root #'api/h derive TAG ::api/client)
+
+
+(defmethod api/set-param [TAG :timeout]
+  [_ params _ timeout]
+  (assoc params
+         :socket-timeout timeout
+         :conn-timeout timeout))
+
+
+(defmethod api/set-param [TAG :headers]
+  [_ params _ headers]
+  (update params :headers merge (util/update-keys headers name)))
 
 
 (deftype CljHTTPLiteClient [defaults]
@@ -78,8 +90,8 @@
 
 (comment
 
-  (def -c (client))
+  (def -c (client {:insecure? true}))
 
-  (api/get -c "https://ya.ru")
+  (def -r (api/get -c "https://ya.ru"))
 
   )

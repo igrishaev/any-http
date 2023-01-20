@@ -7,8 +7,7 @@
    [clj-http.conn-mgr :as conn-mgr]))
 
 
-(def common-params
-  (conj api/common-params :connection-manager))
+(def TAG ::clj-http)
 
 
 (def overrides
@@ -19,8 +18,7 @@
 (defmacro perform [func url defaults options]
   `(let [request#
          (-> ~defaults
-             (merge ~options)
-             (select-keys common-params)
+             (api/set-params ~TAG ~options)
              (merge ~overrides))
 
          response#
@@ -30,6 +28,16 @@
          (update :headers util/update-keys util/header->kw)
          (util/as [{:keys [~'status ~'body ~'headers]}]
            (api/make-response ~'status ~'body ~'headers)))))
+
+
+(alter-var-root #'api/h derive TAG ::api/client)
+
+
+(defmethod api/set-param [TAG :timeout]
+  [_ params _ timeout]
+  (assoc params
+         :socket-timeout timeout
+         :connection-timeout timeout))
 
 
 (deftype CljHTTPClient [defaults]
@@ -71,7 +79,7 @@
   ([]
    (client nil))
   ([defaults]
-   (new CljHTTPClient defaults)))
+   (new CljHTTPClient (api/set-params TAG defaults))))
 
 
 (defn component
@@ -99,6 +107,6 @@
 
   (def -c (client))
 
-  (api/get -c "https://ya.ru")
+  (def -r (api/get -c "https://ya.ru"))
 
   )
